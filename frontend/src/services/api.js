@@ -38,7 +38,7 @@ export const addExpense = async (expenseData) => {
 // Update expense
 export const updateExpense = async (id, expenseData) => {
   const response = await fetch(`${API_BASE_URL}/update/${id}`, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },

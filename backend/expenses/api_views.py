@@ -37,7 +37,7 @@ def add_expense_api(request):
     return Response(expense_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['PUT'])
+@api_view(['PATCH'])
 def update_expense_api(request, id):
     try:
         expense_obj = ExpenseModel.objects.get(expense_id=id)
