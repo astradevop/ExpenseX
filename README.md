@@ -418,6 +418,124 @@ python manage.py migrate
 1. Create superuser: `python manage.py createsuperuser`
 2. Visit: `http://127.0.0.1:8000/admin/`
 
+## Deployment to Render
+
+This project is configured for deployment on Render. Both the backend (Django) and frontend (React) can be deployed using the provided `render.yaml` configuration file.
+
+### Prerequisites
+
+- A Render account (sign up at [render.com](https://render.com))
+- Your project pushed to a Git repository (GitHub, GitLab, or Bitbucket)
+
+### Quick Deploy with render.yaml
+
+1. **Push your code to Git:**
+   ```bash
+   git add .
+   git commit -m "Configure for Render deployment"
+   git push origin main
+   ```
+
+2. **Connect to Render:**
+   - Go to [Render Dashboard](https://dashboard.render.com)
+   - Click "New +" and select "Blueprint"
+   - Connect your Git repository
+   - Render will automatically detect the `render.yaml` file
+
+3. **Deploy:**
+   - Render will create all services defined in `render.yaml`:
+     - Backend Web Service (Django)
+     - Frontend Static Site (React)
+     - PostgreSQL Database
+   - The deployment will start automatically
+
+### Manual Setup (Alternative)
+
+If you prefer to set up services manually:
+
+#### Backend Setup
+
+1. **Create a new Web Service:**
+   - Go to Render Dashboard → "New +" → "Web Service"
+   - Connect your repository
+   - Configure:
+     - **Name:** `expense-backend`
+     - **Environment:** `Python 3`
+     - **Build Command:** `cd backend && pip install -r requirements.txt && chmod +x build.sh && ./build.sh`
+     - **Start Command:** `cd backend && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT`
+
+2. **Create PostgreSQL Database:**
+   - Go to "New +" → "PostgreSQL"
+   - Name it `expense-db`
+   - Note the connection string
+
+3. **Set Environment Variables:**
+   - `SECRET_KEY`: Generate a secure Django secret key
+   - `DEBUG`: `False`
+   - `DATABASE_URL`: Use the PostgreSQL connection string from step 2
+   - `ALLOWED_HOSTS`: Your Render backend URL (e.g., `expense-backend.onrender.com`)
+   - `CORS_ALLOWED_ORIGINS`: Your frontend URL (e.g., `https://expense-frontend.onrender.com`)
+
+#### Frontend Setup
+
+1. **Create a new Static Site:**
+   - Go to "New +" → "Static Site"
+   - Connect your repository
+   - Configure:
+     - **Name:** `expense-frontend`
+     - **Build Command:** `cd frontend && npm install && npm run build`
+     - **Publish Directory:** `frontend/dist`
+
+2. **Set Environment Variables:**
+   - `VITE_API_BASE_URL`: Your backend URL (e.g., `https://expense-backend.onrender.com`)
+
+### Environment Variables Reference
+
+#### Backend Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `SECRET_KEY` | Django secret key (auto-generated in render.yaml) | `django-insecure-...` |
+| `DEBUG` | Debug mode (set to `False` in production) | `False` |
+| `DATABASE_URL` | PostgreSQL connection string (auto-set from database) | `postgresql://...` |
+| `ALLOWED_HOSTS` | Comma-separated list of allowed hosts | `expense-backend.onrender.com` |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | `https://expense-frontend.onrender.com` |
+
+#### Frontend Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `VITE_API_BASE_URL` | Backend API base URL | `https://expense-backend.onrender.com` |
+
+### Post-Deployment
+
+1. **Create a superuser (if needed):**
+   - Use Render's Shell feature to run:
+     ```bash
+     cd backend
+     python manage.py createsuperuser
+     ```
+
+2. **Access your application:**
+   - Frontend: `https://expense-frontend.onrender.com`
+   - Backend API: `https://expense-backend.onrender.com/api/`
+   - Admin Panel: `https://expense-backend.onrender.com/admin/`
+
+### Troubleshooting
+
+- **Build fails:** Check build logs in Render dashboard
+- **Database connection errors:** Verify `DATABASE_URL` is set correctly
+- **CORS errors:** Ensure `CORS_ALLOWED_ORIGINS` includes your frontend URL
+- **Static files not loading:** Verify WhiteNoise is configured and static files are collected
+
+### Notes
+
+- The free tier on Render spins down after 15 minutes of inactivity
+- First request after spin-down may take longer
+- Consider upgrading to a paid plan for production use
+- Media files (uploaded images) are stored on the server filesystem and will be lost on redeploy
+- For production, consider using cloud storage (AWS S3, Cloudinary) for media files
+
 ## License
 
 This project is for educational purposes.

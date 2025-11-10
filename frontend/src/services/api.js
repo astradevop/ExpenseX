@@ -1,5 +1,5 @@
-// API Base URL - Use proxy (relative path) to avoid CORS issues
-const API_BASE_URL = '/api';
+// API Base URL - Use environment variable or fallback to relative path
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Get all expenses
 export const getAllExpenses = async () => {

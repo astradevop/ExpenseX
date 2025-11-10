@@ -1,0 +1,45 @@
+services:
+  # Backend Django Web Service
+  - type: web
+    name: expense-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: cd backend && pip install -r requirements.txt && chmod +x build.sh && ./build.sh
+    startCommand: cd backend && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: DATABASE_URL
+        fromDatabase:
+          name: expense-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+
+  # Frontend React Static Site
+  - type: web
+    name: expense-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+
+databases:
+  # PostgreSQL Database
+  - name: expense-db
+    databaseName: expense_rest
+    user: expense_user
+    plan: free
+    region: oregon
+
