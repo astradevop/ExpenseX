@@ -88,8 +88,10 @@ Desktop.ini
 *.sqlite3
 
 # Media files (user uploaded content)
-/media/*
-!/media/.gitkeep
+backend/media/*
+!backend/media/.gitkeep
+frontend/media/*
+!frontend/media/.gitkeep
 
 # Logs
 logs/
